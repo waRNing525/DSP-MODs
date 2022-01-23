@@ -207,14 +207,14 @@ namespace FactoryMultiplier
 		static class Patch
 		{
 			//获取分馏塔进口速度
-			private static int GetFracStackLevelByEntityId(PowerSystem powersystem, int entityId)
+			private static int GetFracStackCountByEntityId(PowerSystem powersystem, int entityId)
 			{
 				int fracIndex = powersystem.factory.entityPool[entityId].fractionateId;
 				var fracComponent = powersystem.factory.factorySystem.fractionatePool[fracIndex];
 				int num = Mathf.Min(fracComponent.fluidInputCargoCount, 30);
 				int fracComponentSpeed = Mathf.Clamp(num * (int)((float)fracComponent.fluidInputCount / (float)fracComponent.fluidInputCargoCount + 0.5f) * 60, 0, 7200);
-				int stackLevel = (fracComponentSpeed >= 1800) ? (fracComponentSpeed / 1800) : 1;
-				return stackLevel;
+				int stackCount = (fracComponentSpeed >= 1800) ? (fracComponentSpeed / 1800) : 1;
+				return stackCount;
 			}
 
 			//对照数列
@@ -480,8 +480,8 @@ namespace FactoryMultiplier
 						}
 						else if (consumer.prefabDesc.isFractionate)
 						{
-							int stacklevel = GetFracStackLevelByEntityId(__instance, entityId);
-							float multiple_stack = (float)multipleTable[stacklevel];    //根据叠加层数确定加成倍数
+							int stackcount = GetFracStackCountByEntityId(__instance, entityId);
+							float multiple_stack = (float)multipleTable[stackcount];    //根据叠加层数确定加成倍数
 							bool fracMultiplyDefault = fractionateMultiply.Value == 1;
 							if (fracMultiplyDefault)
 							{
@@ -496,9 +496,9 @@ namespace FactoryMultiplier
                         {
 							if (consumer.prefabDesc.isVeinCollector)
                             {
-								var entity = __instance.factory.entityPool[entityId];
-								int veinCollectorSpeed = __instance.factory.factorySystem.minerPool[entity.minerId].speed;
-								powermultiple = (float)veinCollectorSpeed / 10000f * ((float)veinCollectorSpeed / 10000f) * miningMultiply.Value;
+								var entityVeinCollector = __instance.factory.entityPool[entityId];
+								int speedVeinCollector = __instance.factory.factorySystem.minerPool[entityVeinCollector.minerId].speed;
+								powermultiple = (float)speedVeinCollector / 10000f * ((float)speedVeinCollector / 10000f) * miningMultiply.Value;
 							}
 							else
                             {
