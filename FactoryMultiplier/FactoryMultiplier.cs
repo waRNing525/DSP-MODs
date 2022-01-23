@@ -37,7 +37,7 @@ namespace FactoryMultiplier
 		private string ejectormulti_str = "";
 		private string silomulti_str = "";
 		private string gammamulti_str = "";
-		private string miningscalemulti_str = "";
+		private string miningmulti_str = "";
 		private string tempText = "";
 		private bool Showwindow = false;
 		private static Rect window = new Rect(500, 300, 750, 550); //必须先在外面构建
@@ -75,7 +75,7 @@ namespace FactoryMultiplier
 			ejectormulti_str = ejectorMultiply.Value.ToString();
 			silomulti_str = siloMultiply.Value.ToString();
 			gammamulti_str = gammaMultiply.Value.ToString();
-			miningscalemulti_str = miningMultiply.Value.ToString();
+			miningmulti_str = miningMultiply.Value.ToString();
 		}
 
 		void Update()
@@ -130,7 +130,7 @@ namespace FactoryMultiplier
 			silomulti_str = GUI.TextField(new Rect(300, 275, 150, 30), silomulti_str, 1);
 			gammamulti_str = GUI.TextField(new Rect(300, 360, 150, 30), gammamulti_str, 1);
 			walkspeedmulti_str = GUI.TextField(new Rect(540, 20, 75, 30), walkspeedmulti_str, 2);
-			miningscalemulti_str = GUI.TextField(new Rect(540, 105, 150, 30), miningscalemulti_str, 1);
+			miningmulti_str = GUI.TextField(new Rect(540, 105, 150, 30), miningmulti_str, 1);
 
 			GUI.Label(new Rect(300, 460, 150, 50), tempText);    //输出文字
 
@@ -197,8 +197,8 @@ namespace FactoryMultiplier
 			}
 			if (GUI.Button(new Rect(540, 140, 150, 30), "设置采集速度倍数".getTranslate()))
             {
-				miningMultiply.Value = int.Parse(Regex.Replace(miningscalemulti_str, @"[^0-9]", ""));
-				tempText = "采集速度倍数更改为".getTranslate() + miningscalemulti_str + "X";
+				miningMultiply.Value = int.Parse(Regex.Replace(miningmulti_str, @"[^0-9]", ""));
+				tempText = "采集速度倍数更改为".getTranslate() + miningmulti_str + "X";
 			}
 			GUILayout.EndArea();
 			GUI.DragWindow();

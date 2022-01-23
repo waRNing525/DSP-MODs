@@ -38,7 +38,7 @@ namespace FactoryMultiplier
 			TranslateDict.Add("研究站倍数更改为", "Lab Multipe Changed To ");
 			TranslateDict.Add("设置分馏器倍数", "Fractionator Multiple");
 			TranslateDict.Add("分馏器倍数更改为", "Fractionator Multipe Changed To ");
-			TranslateDict.Add("设置弹射器倍数", "Ejector Multiple ");
+			TranslateDict.Add("设置弹射器倍数", "Ejector Multiple");
 			TranslateDict.Add("弹射器倍数更改为", "Ejector Multipe Changed To ");
 			TranslateDict.Add("设置发射井倍数", "Silo Multiple");
 			TranslateDict.Add("发射井倍数更改为", "Silo Multipe Changed To ");
