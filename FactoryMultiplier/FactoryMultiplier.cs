@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace FactoryMultiplier
 {
-	[BepInPlugin("waRNing.dsp.plugins.FactoryMultiplier", "FactoryMultiplier", "2.1.0")]
+	[BepInPlugin("waRNing.dsp.plugins.FactoryMultiplier", "FactoryMultiplier", "2.1.1")]
 	public class FactoryMultiplier : BaseUnityPlugin
 	{
 		private static int walkspeed_tech;
@@ -325,6 +325,8 @@ namespace FactoryMultiplier
 							case ERecipeType.Particle:
 								multiple = particleMultiply.Value;
 								break;
+							default:
+								continue;
 						}
 						__instance.assemblerPool[j].speed = multiple * entityProto.prefabDesc.assemblerSpeed;
 					}
@@ -464,6 +466,8 @@ namespace FactoryMultiplier
 								case ERecipeType.Particle:
 									powermultiple = particleMultiply.Value;
 									break;
+								default:
+									continue;
 							}
 						}
 						else if (consumer.prefabDesc.isLab)
@@ -492,19 +496,21 @@ namespace FactoryMultiplier
 								powermultiple = (float)(Math.Pow(1.055, fractionateMultiply.Value) * fractionateMultiply.Value * multiple_stack);
 							}
 						}
-						else if(consumer.prefabDesc.minerType != EMinerType.None && consumer.prefabDesc.minerPeriod > 0)
-                        {
+						else if (consumer.prefabDesc.minerType != EMinerType.None && consumer.prefabDesc.minerPeriod > 0)
+						{
 							if (consumer.prefabDesc.isVeinCollector)
-                            {
+							{
 								var entityVeinCollector = __instance.factory.entityPool[entityId];
 								int speedVeinCollector = __instance.factory.factorySystem.minerPool[entityVeinCollector.minerId].speed;
 								powermultiple = (float)speedVeinCollector / 10000f * ((float)speedVeinCollector / 10000f) * miningMultiply.Value;
 							}
 							else
-                            {
+							{
 								powermultiple = miningMultiply.Value;
 							}
 						}
+						else continue;	//封闭未改动类型
+
 						__instance.consumerPool[j].workEnergyPerTick = (long)(powermultiple * consumer.prefabDesc.workEnergyPerTick);
 					}
 				}
