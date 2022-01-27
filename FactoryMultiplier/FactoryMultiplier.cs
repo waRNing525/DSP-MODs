@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace FactoryMultiplier
 {
-	[BepInPlugin("waRNing.dsp.plugins.FactoryMultiplier", "FactoryMultiplier", "2.1.1")]
+	[BepInPlugin("waRNing.dsp.plugins.FactoryMultiplier", "FactoryMultiplier", "2.1.2")]
 	public class FactoryMultiplier : BaseUnityPlugin
 	{
 		private static int walkspeed_tech;
@@ -206,23 +206,7 @@ namespace FactoryMultiplier
 		
 		static class Patch
 		{
-			//获取分馏塔进口速度
-			private static int GetFracStackCountByEntityId(PowerSystem powersystem, int entityId)
-			{
-				int fracIndex = powersystem.factory.entityPool[entityId].fractionateId;
-				var fracComponent = powersystem.factory.factorySystem.fractionatePool[fracIndex];
-				int num = Mathf.Min(fracComponent.fluidInputCargoCount, 30);
-				int fracComponentSpeed = Mathf.Clamp(num * (int)((float)fracComponent.fluidInputCount / (float)fracComponent.fluidInputCargoCount + 0.5f) * 60, 0, 7200);
-				int stackCount = (fracComponentSpeed >= 1800) ? (fracComponentSpeed / 1800) : 1;
-				return stackCount;
-			}
-
-			//对照数列
-			private static double[] multipleTable = new double[]
-			{
-				0.0,1.0,1.5,2.0,2.5
-			};
-
+			
 			//机甲速度
 			[HarmonyPrefix, HarmonyPatch(typeof(Player), "GameTick")]
 			private static void WalkSpeed_Tech(Player __instance)
@@ -484,16 +468,14 @@ namespace FactoryMultiplier
 						}
 						else if (consumer.prefabDesc.isFractionate)
 						{
-							int stackcount = GetFracStackCountByEntityId(__instance, entityId);
-							float multiple_stack = (float)multipleTable[stackcount];    //根据叠加层数确定加成倍数
 							bool fracMultiplyDefault = fractionateMultiply.Value == 1;
 							if (fracMultiplyDefault)
 							{
-								powermultiple = 1f * multiple_stack;
+								powermultiple = 1f;
 							}
 							else
 							{
-								powermultiple = (float)(Math.Pow(1.055, fractionateMultiply.Value) * fractionateMultiply.Value * multiple_stack);
+								powermultiple = (float)(Math.Pow(1.055, fractionateMultiply.Value) * fractionateMultiply.Value);
 							}
 						}
 						else if (consumer.prefabDesc.minerType != EMinerType.None && consumer.prefabDesc.minerPeriod > 0)
