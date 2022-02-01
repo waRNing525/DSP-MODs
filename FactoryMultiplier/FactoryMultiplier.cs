@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace FactoryMultiplier
 {
-	[BepInPlugin("waRNing.dsp.plugins.FactoryMultiplier", "FactoryMultiplier", "2.1.2")]
+	[BepInPlugin("waRNing.dsp.plugins.FactoryMultiplier", "FactoryMultiplier", "2.1.3")]
 	public class FactoryMultiplier : BaseUnityPlugin
 	{
 		private static int walkspeed_tech;
@@ -82,6 +82,7 @@ namespace FactoryMultiplier
 		{
 			ToggleWindow();
 		}
+	
 		private void ToggleWindow()
 		{
 			if (!GameMain.isRunning || GameMain.isPaused || GameMain.instance.isMenuDemo)
@@ -277,7 +278,7 @@ namespace FactoryMultiplier
 
 			//工厂
 			[HarmonyPrefix, HarmonyPatch(typeof(FactorySystem), "GameTick", new Type[] { typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int) })]
-			private static void Smelt_patch(FactorySystem __instance)
+			private static void Assembler_patch(FactorySystem __instance)
 			{
 				int multiple = 0;
 				for (int j = 1; j < __instance.assemblerCursor; j++)
@@ -324,11 +325,20 @@ namespace FactoryMultiplier
 			{
 				for (int j = 1; j < __instance.labCursor; j++)
 				{
-					if (__instance.labPool[j].recipeId > 0)
-					{
-						RecipeProto labRecipe = LDB.recipes.Select(__instance.labPool[j].recipeId);
-						__instance.labPool[j].timeSpend = labRecipe.TimeSpend * 10000 / labMultiply.Value;
+					if(!__instance.labPool[j].researchMode)
+                    {
+						if (__instance.labPool[j].recipeId > 0)
+						{
+							RecipeProto labRecipe = LDB.recipes.Select(__instance.labPool[j].recipeId);
+							if (labRecipe != null && labRecipe.Type == ERecipeType.Research)
+							{
+								__instance.labPool[j].timeSpend = labRecipe.TimeSpend * 10000 / labMultiply.Value;
+								__instance.labPool[j].extraTimeSpend = labRecipe.TimeSpend * 100000 / labMultiply.Value;
+							}
+						}
+						
 					}
+					
 				}
 			}
 			//科技研究速率
