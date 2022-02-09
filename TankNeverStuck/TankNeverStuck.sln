@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31112.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TankNeverStuck", "TankNeverStuck\TankNeverStuck.csproj", "{40B5A653-6701-4696-9F6D-5CB1DACA73BD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{40B5A653-6701-4696-9F6D-5CB1DACA73BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40B5A653-6701-4696-9F6D-5CB1DACA73BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40B5A653-6701-4696-9F6D-5CB1DACA73BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40B5A653-6701-4696-9F6D-5CB1DACA73BD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {52F33EE4-7A8A-4807-9988-6D8963380360}
+	EndGlobalSection
+EndGlobal
