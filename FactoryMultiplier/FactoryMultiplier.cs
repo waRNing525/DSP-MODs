@@ -502,7 +502,7 @@ namespace FactoryMultiplier
 							}
 						}
 						else continue;	//封闭未改动类型
-
+						
 						__instance.consumerPool[j].workEnergyPerTick = (long)(powermultiple * consumer.prefabDesc.workEnergyPerTick);
 					}
 				}
