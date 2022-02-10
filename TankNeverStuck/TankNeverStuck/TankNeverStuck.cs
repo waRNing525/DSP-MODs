@@ -7,14 +7,12 @@ namespace TankNeverStuck
     [BepInPlugin("waRNing.dsp.plugins.TankNeverStuck", "TankNeverStuck", "1.0.1")]
     public class TankNeverStuck : BaseUnityPlugin
     {
-        private void Start()
+        void Start()
         {
             Harmony.CreateAndPatchAll(typeof(TankNeverStuck), null);
 
         }
-        private void Update()
-        {
-        }
+
         [HarmonyPostfix]
 		[HarmonyPatch(typeof(FactoryStorage), "GameTick")]
 		public static void Tank_patch(FactoryStorage __instance)
