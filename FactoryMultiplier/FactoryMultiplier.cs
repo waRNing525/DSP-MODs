@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace FactoryMultiplier
 {
-    [BepInPlugin("waRNing.dsp.plugins.FactoryMultiplier", "FactoryMultiplier", "2.1.3")]
+    [BepInPlugin("waRNing.dsp.plugins.FactoryMultiplier", "FactoryMultiplier", "2.2.0")]
     public class FactoryMultiplier : BaseUnityPlugin
     {
         private static int walkspeed_tech;
@@ -19,7 +19,7 @@ namespace FactoryMultiplier
         private static ConfigEntry<int> assembleMultiply;
         private static ConfigEntry<int> particleMultiply;
         private static ConfigEntry<int> labMultiply;
-        private static ConfigEntry<int> fractionateMultiply;
+        private static ConfigEntry<int> fractionatorMultiply;
         private static ConfigEntry<int> ejectorMultiply;
         private static ConfigEntry<int> siloMultiply;
         private static ConfigEntry<int> gammaMultiply;
@@ -33,16 +33,16 @@ namespace FactoryMultiplier
         private string assemblemulti_str = "";
         private string particlemulti_str = "";
         private string labmulti_str = "";
-        private string fractionatemulti_str = "";
+        private string fractionatormulti_str = "";
         private string ejectormulti_str = "";
         private string silomulti_str = "";
         private string gammamulti_str = "";
         private string miningmulti_str = "";
         private string tempText = "";
         private bool Showwindow = false;
-        private static Rect window = new Rect(500, 300, 750, 550); //必须先在外面构建
+        private MyUI myUI;
 
-        void Start()
+        private void Start()
         {
             Harmony.CreateAndPatchAll(typeof(Patch), null);
             Translate.regAllTranslate();
@@ -57,7 +57,7 @@ namespace FactoryMultiplier
             assembleMultiply = Config.Bind("Config", "assembleMultiply", 1, "制造台速度倍率");
             particleMultiply = Config.Bind("Config", "particleMultiply", 1, "对撞机速度倍率");
             labMultiply = Config.Bind("Config", "labMultiply", 1, "研究站速度倍率");
-            fractionateMultiply = Config.Bind("Config", "fractionateMultiply", 1, "分馏塔生产概率倍率");
+            fractionatorMultiply = Config.Bind("Config", "fractionatorMultiply", 1, "分馏塔生产概率倍率");
             ejectorMultiply = Config.Bind("Config", "ejectorMultiply", 1, "弹射器速度倍率");
             siloMultiply = Config.Bind("Config", "siloMultiply", 1, "发射井速度倍率");
             gammaMultiply = Config.Bind("Config", "gammaMultiply", 1, "射线接受倍率");
@@ -71,14 +71,15 @@ namespace FactoryMultiplier
             assemblemulti_str = assembleMultiply.Value.ToString();
             particlemulti_str = particleMultiply.Value.ToString();
             labmulti_str = labMultiply.Value.ToString();
-            fractionatemulti_str = fractionateMultiply.Value.ToString();
+            fractionatormulti_str = fractionatorMultiply.Value.ToString();
             ejectormulti_str = ejectorMultiply.Value.ToString();
             silomulti_str = siloMultiply.Value.ToString();
             gammamulti_str = gammaMultiply.Value.ToString();
             miningmulti_str = miningMultiply.Value.ToString();
+            myUI = new MyUI(new GUI.WindowFunction(MainUI), 750f, 550f, "FactoryMultiplier", 0);
         }
 
-        void Update()
+        private void Update()
         {
             ToggleWindow();
         }
@@ -100,24 +101,12 @@ namespace FactoryMultiplier
             }
         }
 
-        void OnGUI()
+        private void OnGUI()
         {
-            int fontsize = 15;
-            GUI.skin.window.fontSize = fontsize;
-            GUI.skin.label.fontSize = fontsize;
-            GUI.skin.button.fontSize = fontsize;
-            GUI.skin.textField.fontSize = fontsize;
-            GUI.skin.toggle.fontSize = fontsize;
-            //GUI.skin.textArea.fontSize = fontsize;
-            GUI.contentColor = Color.black;
-            GUI.color = Color.cyan;
-            if (Showwindow)
-            {
-                window = GUI.Window(20211229, window, Window_init, "FactoryMultiplier");
-            }
+            myUI.Render(Showwindow);
         }
 
-        private void Window_init(int id)
+        private void MainUI(int id)
         {
             GUILayout.BeginArea(new Rect(0, 20, 750, 550));
             smeltmulti_str = GUI.TextField(new Rect(60, 20, 150, 30), smeltmulti_str, 1);
@@ -126,7 +115,7 @@ namespace FactoryMultiplier
             assemblemulti_str = GUI.TextField(new Rect(60, 275, 150, 30), assemblemulti_str, 1);
             particlemulti_str = GUI.TextField(new Rect(60, 360, 150, 30), particlemulti_str, 1);
             labmulti_str = GUI.TextField(new Rect(300, 20, 150, 30), labmulti_str, 1);
-            fractionatemulti_str = GUI.TextField(new Rect(300, 105, 150, 30), fractionatemulti_str, 2);
+            fractionatormulti_str = GUI.TextField(new Rect(300, 105, 150, 30), fractionatormulti_str, 2);
             ejectormulti_str = GUI.TextField(new Rect(300, 190, 150, 30), ejectormulti_str, 1);
             silomulti_str = GUI.TextField(new Rect(300, 275, 150, 30), silomulti_str, 1);
             gammamulti_str = GUI.TextField(new Rect(300, 360, 150, 30), gammamulti_str, 1);
@@ -167,8 +156,8 @@ namespace FactoryMultiplier
             }
             if (GUI.Button(new Rect(300, 140, 150, 30), "设置分馏器倍数".getTranslate()))
             {
-                fractionateMultiply.Value = int.Parse(Regex.Replace(fractionatemulti_str, @"[^0-9]", ""));
-                tempText = "分馏器倍数更改为".getTranslate() + fractionatemulti_str + "X";
+                fractionatorMultiply.Value = int.Parse(Regex.Replace(fractionatormulti_str, @"[^0-9]", ""));
+                tempText = "分馏器倍数更改为".getTranslate() + fractionatormulti_str + "X";
             }
             if (GUI.Button(new Rect(300, 225, 150, 30), "设置弹射器倍数".getTranslate()))
             {
@@ -207,7 +196,6 @@ namespace FactoryMultiplier
 
         static class Patch
         {
-
             //机甲速度
             [HarmonyPrefix, HarmonyPatch(typeof(Player), "GameTick")]
             private static void WalkSpeed_Tech()
@@ -260,13 +248,11 @@ namespace FactoryMultiplier
                         history.miningSpeedScale = ((float)(history.techStates[3606].curLevel - 1) / 10 + Configs.freeMode.miningSpeedScale) * miningMultiply.Value;
                         break;
                     }
-
                     else if (!history.techStates[3601].unlocked)
                     {
                         history.miningSpeedScale = Configs.freeMode.miningSpeedScale * miningMultiply.Value;
                         break;
                     }
-
                     else if (history.techStates[3600 + i].unlocked)
                     {
                         history.miningSpeedScale = ((float)i / 10 + Configs.freeMode.miningSpeedScale) * miningMultiply.Value;
@@ -274,7 +260,6 @@ namespace FactoryMultiplier
                     }
                 }
             }
-
 
             //工厂
             [HarmonyPrefix, HarmonyPatch(typeof(FactorySystem), "GameTick", new Type[] { typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int) })]
@@ -286,9 +271,9 @@ namespace FactoryMultiplier
                     int entityId = __instance.assemblerPool[j].entityId;
                     if (entityId > 0)
                     {
-                        ItemProto entityProto = LDB.items.Select((int)__instance.factory.entityPool[entityId].protoId);
-                        ERecipeType entityRecipeType = entityProto.prefabDesc.assemblerRecipeType;
-                        switch (entityRecipeType)   //判断生产类型
+                        ItemProto assemblerProto = LDB.items.Select((int)__instance.factory.entityPool[entityId].protoId);
+                        ERecipeType assemblerRecipeType = __instance.assemblerPool[j].recipeType;
+                        switch (assemblerRecipeType)   //判断生产类型
                         {
                             //熔炉
                             case ERecipeType.Smelt:
@@ -310,37 +295,33 @@ namespace FactoryMultiplier
                             case ERecipeType.Particle:
                                 multiple = particleMultiply.Value;
                                 break;
+
                             default:
                                 continue;
                         }
-                        __instance.assemblerPool[j].speed = multiple * entityProto.prefabDesc.assemblerSpeed;
+                        __instance.assemblerPool[j].speed = multiple * assemblerProto.prefabDesc.assemblerSpeed;
                     }
                 }
             }
-
 
             //研究站生产
-            [HarmonyPrefix, HarmonyPatch(typeof(FactorySystem), "GameTick", new Type[] { typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int) })]
-            private static void Lab_patch(FactorySystem __instance)
+            [HarmonyPrefix, HarmonyPatch(typeof(LabComponent), "InternalUpdateAssemble")]
+            private static void Lab_patch(ref LabComponent __instance)
             {
-                for (int j = 1; j < __instance.labCursor; j++)
+                if (!__instance.researchMode)
                 {
-                    if (!__instance.labPool[j].researchMode)
+                    if (__instance.recipeId > 0)
                     {
-                        if (__instance.labPool[j].recipeId > 0)
+                        RecipeProto labRecipe = LDB.recipes.Select(__instance.recipeId);
+                        if (labRecipe != null && labRecipe.Type == ERecipeType.Research)
                         {
-                            RecipeProto labRecipe = LDB.recipes.Select(__instance.labPool[j].recipeId);
-                            if (labRecipe != null && labRecipe.Type == ERecipeType.Research)
-                            {
-                                __instance.labPool[j].timeSpend = labRecipe.TimeSpend * 10000 / labMultiply.Value;
-                                __instance.labPool[j].extraTimeSpend = labRecipe.TimeSpend * 100000 / labMultiply.Value;
-                            }
+                            __instance.timeSpend = labRecipe.TimeSpend * 10000 / labMultiply.Value;
+                            __instance.extraTimeSpend = labRecipe.TimeSpend * 100000 / labMultiply.Value;
                         }
-
                     }
-
                 }
             }
+
             //科技研究速率
             [HarmonyPrefix, HarmonyPatch(typeof(MechaLab), "GameTick")]
             private static void Techspeed_patch(MechaLab __instance)
@@ -353,7 +334,6 @@ namespace FactoryMultiplier
                         history.techSpeed = history.techStates[3904].curLevel * labMultiply.Value;
                         break;
                     }
-
                     else if (!history.techStates[3901].unlocked)
                     {
                         history.techSpeed = Configs.freeMode.techSpeed * labMultiply.Value;
@@ -368,61 +348,38 @@ namespace FactoryMultiplier
             }
 
             //分馏塔
-            [HarmonyPrefix, HarmonyPatch(typeof(FactorySystem), "GameTick", new Type[] { typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int) })]
-            private static void Fractionate_patch(FactorySystem __instance)
+            [HarmonyPrefix, HarmonyPatch(typeof(FractionatorComponent), "InternalUpdate")]
+            private static void Fractionate_patch(ref FractionatorComponent __instance)
             {
-                for (int j = 1; j < __instance.fractionateCursor; j++)
-                {
-                    if (__instance.fractionatePool[j].id == j)
-                    {
-                        __instance.fractionatePool[j].produceProb = fractionateMultiply.Value * 0.01f;
-                    }
-                }
+                __instance.produceProb = fractionatorMultiply.Value * 0.01f;
             }
-
 
             //弹射器
-            [HarmonyPrefix, HarmonyPatch(typeof(FactorySystem), "GameTick", new Type[] { typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int) })]
-            private static void Ejector_patch(FactorySystem __instance)
+            [HarmonyPrefix, HarmonyPatch(typeof(EjectorComponent), "InternalUpdate")]
+            private static void Ejector_patch(ref EjectorComponent __instance)
             {
                 ItemProto Ejector = LDB.items.Select(2311);
-                for (int j = 1; j < __instance.ejectorCursor; j++)
-                {
-                    if (__instance.ejectorPool[j].id == j)
-                    {
-                        __instance.ejectorPool[j].chargeSpend = Ejector.prefabDesc.ejectorChargeFrame * 10000 / ejectorMultiply.Value;
-                        __instance.ejectorPool[j].coldSpend = Ejector.prefabDesc.ejectorColdFrame * 10000 / ejectorMultiply.Value;
-                    }
-                }
+                __instance.chargeSpend = Ejector.prefabDesc.ejectorChargeFrame * 10000 / ejectorMultiply.Value;
+                __instance.coldSpend = Ejector.prefabDesc.ejectorColdFrame * 10000 / ejectorMultiply.Value;
             }
 
-
             //发射井
-            [HarmonyPrefix, HarmonyPatch(typeof(FactorySystem), "GameTick", new Type[] { typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int) })]
-            private static void Silo_patch(FactorySystem __instance)
+            [HarmonyPrefix, HarmonyPatch(typeof(SiloComponent), "InternalUpdate")]
+            private static void Silo_patch(ref SiloComponent __instance)
             {
                 ItemProto Silo = LDB.items.Select(2312);
-                for (int j = 1; j < __instance.siloCursor; j++)
-                {
-                    if (__instance.siloPool[j].id == j)
-                    {
-                        __instance.siloPool[j].chargeSpend = Silo.prefabDesc.siloChargeFrame * 10000 / siloMultiply.Value;
-                        __instance.siloPool[j].coldSpend = Silo.prefabDesc.siloColdFrame * 10000 / siloMultiply.Value;
-                    }
-                }
+                __instance.chargeSpend = Silo.prefabDesc.siloChargeFrame * 10000 / siloMultiply.Value;
+                __instance.coldSpend = Silo.prefabDesc.siloColdFrame * 10000 / siloMultiply.Value;
             }
 
             //射线接受站
-            [HarmonyPrefix, HarmonyPatch(typeof(PowerSystem), "GameTick")]
-            private static void Gamma_patch(PowerSystem __instance)
+            [HarmonyPrefix, HarmonyPatch(typeof(PowerGeneratorComponent), "GameTick_Gamma")]
+            private static void Gamma_patch(ref PowerGeneratorComponent __instance)
             {
                 ItemProto Gamma = LDB.items.Select(2208);
-                for (int j = 1; j < __instance.genCursor; j++)
+                if (__instance.gamma)
                 {
-                    if (__instance.genPool[j].id == j && __instance.genPool[j].gamma)
-                    {
-                        __instance.genPool[j].genEnergyPerTick = gammaMultiply.Value * Gamma.prefabDesc.genEnergyPerTick;
-                    }
+                    __instance.genEnergyPerTick = gammaMultiply.Value * Gamma.prefabDesc.genEnergyPerTick;
                 }
             }
 
@@ -445,18 +402,23 @@ namespace FactoryMultiplier
                                 case ERecipeType.Smelt:
                                     powermultiple = smeltMultiply.Value;
                                     break;
+
                                 case ERecipeType.Chemical:
                                     powermultiple = chemicalMultiply.Value;
                                     break;
+
                                 case ERecipeType.Refine:
                                     powermultiple = refineMultiply.Value;
                                     break;
+
                                 case ERecipeType.Assemble:
                                     powermultiple = assembleMultiply.Value;
                                     break;
+
                                 case ERecipeType.Particle:
                                     powermultiple = particleMultiply.Value;
                                     break;
+
                                 default:
                                     continue;
                             }
@@ -473,30 +435,21 @@ namespace FactoryMultiplier
                         {
                             powermultiple = siloMultiply.Value;
                         }
-                        else if (consumer.prefabDesc.isFractionate)
+                        else if (consumer.prefabDesc.isFractionator)
                         {
-                            bool fracMultiplyDefault = fractionateMultiply.Value == 1;
+                            bool fracMultiplyDefault = fractionatorMultiply.Value == 1;
                             if (fracMultiplyDefault)
                             {
                                 powermultiple = 1f;
                             }
                             else
                             {
-                                powermultiple = (float)(Math.Pow(1.055, fractionateMultiply.Value) * fractionateMultiply.Value);
+                                powermultiple = (float)(Math.Pow(1.055, fractionatorMultiply.Value) * fractionatorMultiply.Value);
                             }
                         }
                         else if (consumer.prefabDesc.minerType != EMinerType.None && consumer.prefabDesc.minerPeriod > 0)
                         {
-                            if (consumer.prefabDesc.isVeinCollector)
-                            {
-                                var entityVeinCollector = __instance.factory.entityPool[entityId];
-                                int speedVeinCollector = __instance.factory.factorySystem.minerPool[entityVeinCollector.minerId].speed;
-                                powermultiple = (float)speedVeinCollector / 10000f * ((float)speedVeinCollector / 10000f) * miningMultiply.Value;
-                            }
-                            else
-                            {
-                                powermultiple = miningMultiply.Value;
-                            }
+                            powermultiple = miningMultiply.Value;
                         }
                         else continue;  //封闭未改动类型
 
@@ -507,5 +460,3 @@ namespace FactoryMultiplier
         }
     }
 }
-
-
