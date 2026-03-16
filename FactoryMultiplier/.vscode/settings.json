@@ -1,7 +1,0 @@
-{
-    // 其他设置...
-    "chatgpt.openOnStartup": true,
-    "terminal.integrated.env.windows": {
-        "DOTNET_CLI_UI_LANGUAGE": "en-US"
-    },
-}
