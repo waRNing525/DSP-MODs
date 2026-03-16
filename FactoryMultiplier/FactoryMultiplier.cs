@@ -1,12 +1,8 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
-using BepInEx.Logging;
 using HarmonyLib;
 using System;
-using System.Diagnostics;
-using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace FactoryMultiplier
@@ -14,7 +10,6 @@ namespace FactoryMultiplier
     [BepInPlugin("waRNing.dsp.plugins.FactoryMultiplier", "FactoryMultiplier", "2.2.0")]
     public class FactoryMultiplier : BaseUnityPlugin
     {
-        internal static ManualLogSource Log;
         private static int walkspeed_tech;
         private static ConfigEntry<int> walkspeedMultiply;
         private static ConfigEntry<int> miningMultiply;
@@ -47,10 +42,9 @@ namespace FactoryMultiplier
         private bool Showwindow = false;
         private MyUI myUI;
 
-        private void Awake() { Log = base.Logger; }
         private void Start()
         {
-            Harmony.CreateAndPatchAll(typeof(harmony_Patch), null);
+            Harmony.CreateAndPatchAll(typeof(Patch), null);
             Translate.regAllTranslate();
 
             mainWindowHotkey = Config.Bind("Keyboard Shortcuts", "mainWindowHotkey", KeyboardShortcut.Deserialize("R + LeftControl"),
@@ -88,12 +82,6 @@ namespace FactoryMultiplier
         private void Update()
         {
             ToggleWindow();
-            if (GameMain.isRunning) 
-            {
-                FactorySystemPatcher();
-                MiningSpeedScale_patch();
-            }
-                
         }
 
         private void ToggleWindow()
@@ -111,19 +99,6 @@ namespace FactoryMultiplier
             {
                 Showwindow = false;
             }
-        }
-        private static int ParsePositiveIntOrDefault(string input, int defaultValue)
-        {
-            string digits = Regex.Replace(input ?? string.Empty, @"[^0-9]", "");
-            if (string.IsNullOrEmpty(digits))
-            {
-                return defaultValue;
-            }
-            if (int.TryParse(digits, out int value))
-            {
-                return value;
-            }
-            return defaultValue;
         }
 
         private void OnGUI()
@@ -151,157 +126,75 @@ namespace FactoryMultiplier
 
             if (GUI.Button(new Rect(60, 55, 150, 30), "设置冶炼倍数".getTranslate()))
             {
-                smeltMultiply.Value = ParsePositiveIntOrDefault(smeltmulti_str, 1);
+                smeltMultiply.Value = int.Parse(Regex.Replace(smeltmulti_str, @"[^0-9]", ""));
                 tempText = "冶炼倍数更改为".getTranslate() + smeltmulti_str + "X";
             }
             if (GUI.Button(new Rect(60, 140, 150, 30), "设置化工厂倍数".getTranslate()))
             {
-                chemicalMultiply.Value = ParsePositiveIntOrDefault(chemicalmulti_str, 1);
+                chemicalMultiply.Value = int.Parse(Regex.Replace(chemicalmulti_str, @"[^0-9]", ""));
                 tempText = "化工厂倍数更改为".getTranslate() + chemicalmulti_str + "X";
             }
             if (GUI.Button(new Rect(60, 225, 150, 30), "设置精炼厂倍数".getTranslate()))
             {
-                refineMultiply.Value = ParsePositiveIntOrDefault(refinemulti_str, 1);
+                refineMultiply.Value = int.Parse(Regex.Replace(refinemulti_str, @"[^0-9]", ""));
                 tempText = "精炼厂倍数更改为".getTranslate() + refinemulti_str + "X";
             }
             if (GUI.Button(new Rect(60, 310, 150, 30), "设置制造台倍数".getTranslate()))
             {
-                assembleMultiply.Value = ParsePositiveIntOrDefault(assemblemulti_str, 1);
+                assembleMultiply.Value = int.Parse(Regex.Replace(assemblemulti_str, @"[^0-9]", ""));
                 tempText = "制造台倍数更改为".getTranslate() + assemblemulti_str + "X";
             }
             if (GUI.Button(new Rect(60, 395, 150, 30), "设置对撞机倍数".getTranslate()))
             {
-                particleMultiply.Value = ParsePositiveIntOrDefault(particlemulti_str, 1);
+                particleMultiply.Value = int.Parse(Regex.Replace(particlemulti_str, @"[^0-9]", ""));
                 tempText = "对撞机倍数更改为".getTranslate() + particlemulti_str + "X";
             }
             if (GUI.Button(new Rect(300, 55, 150, 30), "设置研究站倍数".getTranslate()))
             {
-                labMultiply.Value = ParsePositiveIntOrDefault(labmulti_str, 1);
+                labMultiply.Value = int.Parse(Regex.Replace(labmulti_str, @"[^0-9]", ""));
                 tempText = "研究站倍数更改为".getTranslate() + labmulti_str + "X";
             }
             if (GUI.Button(new Rect(300, 140, 150, 30), "设置分馏器倍数".getTranslate()))
             {
-                fractionatorMultiply.Value = ParsePositiveIntOrDefault(fractionatormulti_str, 1);
+                fractionatorMultiply.Value = int.Parse(Regex.Replace(fractionatormulti_str, @"[^0-9]", ""));
                 tempText = "分馏器倍数更改为".getTranslate() + fractionatormulti_str + "X";
             }
             if (GUI.Button(new Rect(300, 225, 150, 30), "设置弹射器倍数".getTranslate()))
             {
-                ejectorMultiply.Value = ParsePositiveIntOrDefault(ejectormulti_str, 1);
+                ejectorMultiply.Value = int.Parse(Regex.Replace(ejectormulti_str, @"[^0-9]", ""));
                 tempText = "弹射器倍数更改为".getTranslate() + ejectormulti_str + "X";
             }
             if (GUI.Button(new Rect(300, 310, 150, 30), "设置发射井倍数".getTranslate()))
             {
-                siloMultiply.Value = ParsePositiveIntOrDefault(silomulti_str, 1);
+                siloMultiply.Value = int.Parse(Regex.Replace(silomulti_str, @"[^0-9]", ""));
                 tempText = "发射井倍数更改为".getTranslate() + silomulti_str + "X";
             }
             if (GUI.Button(new Rect(300, 395, 150, 30), "设置射线站倍数".getTranslate()))
             {
-                gammaMultiply.Value = ParsePositiveIntOrDefault(gammamulti_str, 1);
+                gammaMultiply.Value = int.Parse(Regex.Replace(gammamulti_str, @"[^0-9]", ""));
                 tempText = "射线站倍数更改为".getTranslate() + gammamulti_str + "X";
             }
             if (GUI.Button(new Rect(540, 55, 150, 30), "设置行走倍数".getTranslate()))
             {
                 Speed_set.Value = false;
-                walkspeedMultiply.Value = ParsePositiveIntOrDefault(walkspeedmulti_str, 1);
+                walkspeedMultiply.Value = int.Parse(Regex.Replace(walkspeedmulti_str, @"[^0-9]", ""));
                 tempText = "行走倍数更改为".getTranslate() + walkspeedmulti_str + "X";
             }
-            Speed_set.Value = GUI.Toggle(new Rect(620, 20, 70, 30), Speed_set.Value, "m/s");
-            if (Speed_set.Value)
+            if (Speed_set.Value = GUI.Toggle(new Rect(620, 20, 70, 30), Speed_set.Value, "m/s"))
             {
-                int walkSpeed = ParsePositiveIntOrDefault(walkspeedmulti_str, 1);
-                GameMain.mainPlayer.mecha.walkSpeed = walkSpeed;
-                walkspeedMultiply.Value = walkSpeed;
+                GameMain.mainPlayer.mecha.walkSpeed = float.Parse(Regex.Replace(walkspeedmulti_str, @"[^0-9]", ""));
+                walkspeedMultiply.Value = int.Parse(Regex.Replace(walkspeedmulti_str, @"[^0-9]", ""));
             }
             if (GUI.Button(new Rect(540, 140, 150, 30), "设置采集速度倍数".getTranslate()))
             {
-                miningMultiply.Value = ParsePositiveIntOrDefault(miningmulti_str, 1);
+                miningMultiply.Value = int.Parse(Regex.Replace(miningmulti_str, @"[^0-9]", ""));
                 tempText = "采集速度倍数更改为".getTranslate() + miningmulti_str + "X";
             }
             GUILayout.EndArea();
             GUI.DragWindow();
         }
-        //工厂
-        private static void FactorySystemPatcher()
-        {
-            foreach (var factory in GameMain.data.factories)
-            {
-                if (factory == null) continue;
-                if (factory.factorySystem != null)
-                {
-                    Assemblerpatch(factory.factorySystem,factory);
-                }
-            }
-        }   
-        private static void Assemblerpatch(FactorySystem factorySystem, PlanetFactory factory)
-        {
-            
-                int multiple = 0;
-                for (int i = 1; i < factorySystem.assemblerCursor; i++)
-                {
-                    if (factorySystem.assemblerPool[i].id == i)
-                    {
-                        int entityId = factorySystem.assemblerPool[i].entityId;
-                        if (entityId > 0)
-                        {
-                                ItemProto assemblerProto = LDB.items.Select((int)factory.entityPool[entityId].protoId);
-                                ERecipeType assemblerRecipeType = factorySystem.assemblerPool[i].recipeType;
-                                switch (assemblerRecipeType)   //判断生产类型
-                                {
-                                    //熔炉
-                                    case ERecipeType.Smelt:
-                                        multiple = smeltMultiply.Value;
-                                        break;
-                                    //化工厂
-                                    case ERecipeType.Chemical:
-                                        multiple = chemicalMultiply.Value;
-                                        break;
-                                    //精炼厂
-                                    case ERecipeType.Refine:
-                                        multiple = refineMultiply.Value;
-                                        break;
-                                    //制造台
-                                    case ERecipeType.Assemble:
-                                        multiple = assembleMultiply.Value;
-                                        break;
-                                    //对撞机
-                                    case ERecipeType.Particle:
-                                        multiple = particleMultiply.Value;
-                                        break;
 
-                                    default:
-                                        continue;
-                                }
-                                factorySystem.assemblerPool[i].speed = multiple * assemblerProto.prefabDesc.assemblerSpeed;
-                        }
-                    }
-                        
-                }
-        }
-        //矿物速度
-        private static void MiningSpeedScale_patch()
-            {
-                GameHistoryData history = GameMain.history;
-                for (int i = 4; i > 0; i--)
-                {
-                    if (history.techStates[3605].unlocked)
-                    {
-                        history.miningSpeedScale = ((float)(history.techStates[3606].curLevel - 1) / 10 + Configs.freeMode.miningSpeedScale) * miningMultiply.Value;
-                        break;
-                    }
-                    else if (!history.techStates[3601].unlocked)
-                    {
-                        history.miningSpeedScale = Configs.freeMode.miningSpeedScale * miningMultiply.Value;
-                        break;
-                    }
-                    else if (history.techStates[3600 + i].unlocked)
-                    {
-                        history.miningSpeedScale = ((float)i / 10 + Configs.freeMode.miningSpeedScale) * miningMultiply.Value;
-                        break;
-                    }
-                }
-            }
-
-        static class harmony_Patch
+        static class Patch
         {
             //机甲速度
             [HarmonyPrefix, HarmonyPatch(typeof(Player), "GameTick")]
@@ -324,7 +217,7 @@ namespace FactoryMultiplier
             }
 
             [HarmonyPrefix, HarmonyPatch(typeof(Mecha), "GameTick")]
-            private static void WalkSpeed_patch(ref Mecha __instance)
+            private static void WalkSpeed_patch(Mecha __instance)
             {
                 if (!Speed_set.Value)
                 {
@@ -343,12 +236,78 @@ namespace FactoryMultiplier
                 }
             }
 
+            //采集速率
+            [HarmonyPrefix, HarmonyPatch(typeof(FactorySystem), "GameTick", new Type[] { typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int) })]
+            private static void MiningSpeedScale_patch()
+            {
+                GameHistoryData history = GameMain.history;
+                for (int i = 4; i > 0; i--)
+                {
+                    if (history.techStates[3605].unlocked)
+                    {
+                        history.miningSpeedScale = ((float)(history.techStates[3606].curLevel - 1) / 10 + Configs.freeMode.miningSpeedScale) * miningMultiply.Value;
+                        break;
+                    }
+                    else if (!history.techStates[3601].unlocked)
+                    {
+                        history.miningSpeedScale = Configs.freeMode.miningSpeedScale * miningMultiply.Value;
+                        break;
+                    }
+                    else if (history.techStates[3600 + i].unlocked)
+                    {
+                        history.miningSpeedScale = ((float)i / 10 + Configs.freeMode.miningSpeedScale) * miningMultiply.Value;
+                        break;
+                    }
+                }
+            }
+
+            //工厂
+            [HarmonyPrefix, HarmonyPatch(typeof(FactorySystem), "GameTick", new Type[] { typeof(long), typeof(bool), typeof(int), typeof(int), typeof(int) })]
+            private static void Assembler_patch(FactorySystem __instance)
+            {
+                int multiple = 0;
+                for (int j = 1; j < __instance.assemblerCursor; j++)
+                {
+                    int entityId = __instance.assemblerPool[j].entityId;
+                    if (entityId > 0)
+                    {
+                        ItemProto assemblerProto = LDB.items.Select((int)__instance.factory.entityPool[entityId].protoId);
+                        ERecipeType assemblerRecipeType = __instance.assemblerPool[j].recipeType;
+                        switch (assemblerRecipeType)   //判断生产类型
+                        {
+                            //熔炉
+                            case ERecipeType.Smelt:
+                                multiple = smeltMultiply.Value;
+                                break;
+                            //化工厂
+                            case ERecipeType.Chemical:
+                                multiple = chemicalMultiply.Value;
+                                break;
+                            //精炼厂
+                            case ERecipeType.Refine:
+                                multiple = refineMultiply.Value;
+                                break;
+                            //制造台
+                            case ERecipeType.Assemble:
+                                multiple = assembleMultiply.Value;
+                                break;
+                            //对撞机
+                            case ERecipeType.Particle:
+                                multiple = particleMultiply.Value;
+                                break;
+
+                            default:
+                                continue;
+                        }
+                        __instance.assemblerPool[j].speed = multiple * assemblerProto.prefabDesc.assemblerSpeed;
+                    }
+                }
+            }
 
             //研究站生产
             [HarmonyPrefix, HarmonyPatch(typeof(LabComponent), "InternalUpdateAssemble")]
             private static void Lab_patch(ref LabComponent __instance)
             {
-                ItemProto LabProto = LDB.items.Select(2901);
                 if (!__instance.researchMode)
                 {
                     if (__instance.recipeId > 0)
@@ -356,7 +315,8 @@ namespace FactoryMultiplier
                         RecipeProto labRecipe = LDB.recipes.Select(__instance.recipeId);
                         if (labRecipe != null && labRecipe.Type == ERecipeType.Research)
                         {
-                            __instance.speed = LabProto.prefabDesc.labAssembleSpeed * labMultiply.Value;
+                            __instance.timeSpend = labRecipe.TimeSpend * 10000 / labMultiply.Value;
+                            __instance.extraTimeSpend = labRecipe.TimeSpend * 100000 / labMultiply.Value;
                         }
                     }
                 }
