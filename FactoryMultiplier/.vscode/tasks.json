@@ -1,0 +1,29 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "dotnet: build",
+			"type": "shell",
+			"command": "dotnet",
+			"args": [
+				"build"
+			],
+			"group": "build",
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"options": {
+				"shell": {
+					"executable": "cmd.exe",
+					"args": [
+						"/c",
+						"chcp 65001 >nul &&"
+					]
+				},
+				"env": {
+					"DOTNET_CLI_UI_LANGUAGE": "en-US"
+				}
+			}
+		}
+	]
+}
