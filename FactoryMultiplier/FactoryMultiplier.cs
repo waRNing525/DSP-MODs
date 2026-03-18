@@ -14,6 +14,22 @@ namespace FactoryMultiplier
     [BepInPlugin("waRNing.dsp.plugins.FactoryMultiplier", "FactoryMultiplier", "2.2.0")]
     public class FactoryMultiplier : BaseUnityPlugin
     {
+        internal enum MultiplierField
+        {
+            Smelt,
+            Chemical,
+            Refine,
+            Assemble,
+            Particle,
+            Lab,
+            Fractionator,
+            Ejector,
+            Silo,
+            Gamma,
+            WalkSpeed,
+            Mining
+        }
+
         internal static ManualLogSource Log;
         private static int walkspeed_tech;
         private static ConfigEntry<int> walkspeedMultiply;
@@ -45,7 +61,7 @@ namespace FactoryMultiplier
         private string miningmulti_str = "";
         private string tempText = "";
         private bool Showwindow = false;
-        private MyUI myUI;
+        private FactoryMultiplierWindow window;
 
         private void Awake() { Log = base.Logger; }
         private void Start()
@@ -82,14 +98,24 @@ namespace FactoryMultiplier
             silomulti_str = siloMultiply.Value.ToString();
             gammamulti_str = gammaMultiply.Value.ToString();
             miningmulti_str = miningMultiply.Value.ToString();
-            myUI = new MyUI(new GUI.WindowFunction(MainUI), 750f, 550f, "FactoryMultiplier", 0);
         }
 
         private void Update()
         {
             ToggleWindow();
+            if (window == null)
+            {
+                window = new FactoryMultiplierWindow(this);
+            }
+            window.Tick(Showwindow);
+            if (Showwindow && window != null && !window.IsVisible)
+            {
+                Showwindow = false;
+            }
+
             if (GameMain.isRunning) 
             {
+                UpdateDirectWalkSpeed();
                 FactorySystemPatcher();
                 MiningSpeedScale_patch();
             }
@@ -100,6 +126,7 @@ namespace FactoryMultiplier
         {
             if (!GameMain.isRunning || GameMain.isPaused || GameMain.instance.isMenuDemo)
             {
+                Showwindow = false;
                 return;  //只有在游戏运行时才可以用快捷键唤出窗口
             }
             if (mainWindowHotkey.Value.IsDown())
@@ -126,100 +153,257 @@ namespace FactoryMultiplier
             return defaultValue;
         }
 
-        private void OnGUI()
+        private void UpdateDirectWalkSpeed()
         {
-            myUI.Render(Showwindow);
-        }
-
-        private void MainUI(int id)
-        {
-            GUILayout.BeginArea(new Rect(0, 20, 750, 550));
-            smeltmulti_str = GUI.TextField(new Rect(60, 20, 150, 30), smeltmulti_str, 1);
-            chemicalmulti_str = GUI.TextField(new Rect(60, 105, 150, 30), chemicalmulti_str, 1);
-            refinemulti_str = GUI.TextField(new Rect(60, 190, 150, 30), refinemulti_str, 1);
-            assemblemulti_str = GUI.TextField(new Rect(60, 275, 150, 30), assemblemulti_str, 1);
-            particlemulti_str = GUI.TextField(new Rect(60, 360, 150, 30), particlemulti_str, 1);
-            labmulti_str = GUI.TextField(new Rect(300, 20, 150, 30), labmulti_str, 1);
-            fractionatormulti_str = GUI.TextField(new Rect(300, 105, 150, 30), fractionatormulti_str, 2);
-            ejectormulti_str = GUI.TextField(new Rect(300, 190, 150, 30), ejectormulti_str, 1);
-            silomulti_str = GUI.TextField(new Rect(300, 275, 150, 30), silomulti_str, 1);
-            gammamulti_str = GUI.TextField(new Rect(300, 360, 150, 30), gammamulti_str, 1);
-            walkspeedmulti_str = GUI.TextField(new Rect(540, 20, 75, 30), walkspeedmulti_str, 2);
-            miningmulti_str = GUI.TextField(new Rect(540, 105, 150, 30), miningmulti_str, 1);
-
-            GUI.Label(new Rect(300, 460, 150, 50), tempText);    //输出文字
-
-            if (GUI.Button(new Rect(60, 55, 150, 30), "设置冶炼倍数".getTranslate()))
-            {
-                smeltMultiply.Value = ParsePositiveIntOrDefault(smeltmulti_str, 1);
-                tempText = "冶炼倍数更改为".getTranslate() + smeltmulti_str + "X";
-            }
-            if (GUI.Button(new Rect(60, 140, 150, 30), "设置化工厂倍数".getTranslate()))
-            {
-                chemicalMultiply.Value = ParsePositiveIntOrDefault(chemicalmulti_str, 1);
-                tempText = "化工厂倍数更改为".getTranslate() + chemicalmulti_str + "X";
-            }
-            if (GUI.Button(new Rect(60, 225, 150, 30), "设置精炼厂倍数".getTranslate()))
-            {
-                refineMultiply.Value = ParsePositiveIntOrDefault(refinemulti_str, 1);
-                tempText = "精炼厂倍数更改为".getTranslate() + refinemulti_str + "X";
-            }
-            if (GUI.Button(new Rect(60, 310, 150, 30), "设置制造台倍数".getTranslate()))
-            {
-                assembleMultiply.Value = ParsePositiveIntOrDefault(assemblemulti_str, 1);
-                tempText = "制造台倍数更改为".getTranslate() + assemblemulti_str + "X";
-            }
-            if (GUI.Button(new Rect(60, 395, 150, 30), "设置对撞机倍数".getTranslate()))
-            {
-                particleMultiply.Value = ParsePositiveIntOrDefault(particlemulti_str, 1);
-                tempText = "对撞机倍数更改为".getTranslate() + particlemulti_str + "X";
-            }
-            if (GUI.Button(new Rect(300, 55, 150, 30), "设置研究站倍数".getTranslate()))
-            {
-                labMultiply.Value = ParsePositiveIntOrDefault(labmulti_str, 1);
-                tempText = "研究站倍数更改为".getTranslate() + labmulti_str + "X";
-            }
-            if (GUI.Button(new Rect(300, 140, 150, 30), "设置分馏器倍数".getTranslate()))
-            {
-                fractionatorMultiply.Value = ParsePositiveIntOrDefault(fractionatormulti_str, 1);
-                tempText = "分馏器倍数更改为".getTranslate() + fractionatormulti_str + "X";
-            }
-            if (GUI.Button(new Rect(300, 225, 150, 30), "设置弹射器倍数".getTranslate()))
-            {
-                ejectorMultiply.Value = ParsePositiveIntOrDefault(ejectormulti_str, 1);
-                tempText = "弹射器倍数更改为".getTranslate() + ejectormulti_str + "X";
-            }
-            if (GUI.Button(new Rect(300, 310, 150, 30), "设置发射井倍数".getTranslate()))
-            {
-                siloMultiply.Value = ParsePositiveIntOrDefault(silomulti_str, 1);
-                tempText = "发射井倍数更改为".getTranslate() + silomulti_str + "X";
-            }
-            if (GUI.Button(new Rect(300, 395, 150, 30), "设置射线站倍数".getTranslate()))
-            {
-                gammaMultiply.Value = ParsePositiveIntOrDefault(gammamulti_str, 1);
-                tempText = "射线站倍数更改为".getTranslate() + gammamulti_str + "X";
-            }
-            if (GUI.Button(new Rect(540, 55, 150, 30), "设置行走倍数".getTranslate()))
-            {
-                Speed_set.Value = false;
-                walkspeedMultiply.Value = ParsePositiveIntOrDefault(walkspeedmulti_str, 1);
-                tempText = "行走倍数更改为".getTranslate() + walkspeedmulti_str + "X";
-            }
-            Speed_set.Value = GUI.Toggle(new Rect(620, 20, 70, 30), Speed_set.Value, "m/s");
             if (Speed_set.Value)
             {
                 int walkSpeed = ParsePositiveIntOrDefault(walkspeedmulti_str, 1);
-                GameMain.mainPlayer.mecha.walkSpeed = walkSpeed;
+                if (GameMain.mainPlayer?.mecha != null)
+                {
+                    GameMain.mainPlayer.mecha.walkSpeed = walkSpeed;
+                }
                 walkspeedMultiply.Value = walkSpeed;
             }
-            if (GUI.Button(new Rect(540, 140, 150, 30), "设置采集速度倍数".getTranslate()))
-            {
-                miningMultiply.Value = ParsePositiveIntOrDefault(miningmulti_str, 1);
-                tempText = "采集速度倍数更改为".getTranslate() + miningmulti_str + "X";
-            }
-            GUILayout.EndArea();
-            GUI.DragWindow();
         }
+
+        private void ApplyConfigValue(ref string textValue, ConfigEntry<int> config, string changeText, int defaultValue = 1)
+        {
+            int value = ParsePositiveIntOrDefault(textValue, defaultValue);
+            config.Value = value;
+            textValue = value.ToString();
+            tempText = changeText.getTranslate() + textValue + "X";
+        }
+
+        private void ApplyWalkSpeedValue()
+        {
+            Speed_set.Value = false;
+            int value = ParsePositiveIntOrDefault(walkspeedmulti_str, 1);
+            walkspeedMultiply.Value = value;
+            walkspeedmulti_str = value.ToString();
+            tempText = "行走倍数更改为".getTranslate() + walkspeedmulti_str + "X";
+        }
+
+        internal bool DirectWalkSpeedMode
+        {
+            get => Speed_set.Value;
+            set => Speed_set.Value = value;
+        }
+
+        internal bool IsWindowVisible => Showwindow;
+
+        internal void SetWindowVisible(bool visible)
+        {
+            Showwindow = visible;
+            if (!visible)
+            {
+                tempText = "";
+            }
+        }
+
+        internal string GetWindowTitle()
+        {
+            return "工厂倍率设置".getTranslate();
+        }
+
+        internal string GetSectionTitle(bool isLeftSection)
+        {
+            return (isLeftSection ? "生产与科研" : "物流、能源与角色").getTranslate();
+        }
+
+        internal string GetStatusText()
+        {
+            if (!string.IsNullOrEmpty(tempText))
+            {
+                return tempText;
+            }
+            return "在这里修改倍率并点击应用按钮。".getTranslate();
+        }
+
+        internal string GetHotkeyHint()
+        {
+            return string.Format("快捷键：{0}".getTranslate(), mainWindowHotkey?.Value.ToString() ?? "Ctrl + R");
+        }
+
+        internal string GetWalkSpeedModeText()
+        {
+            return "直接设置行走速度（m/s）".getTranslate();
+        }
+
+        internal string GetApplyButtonText()
+        {
+            return "应用".getTranslate();
+        }
+
+        internal int GetCharacterLimit(MultiplierField field)
+        {
+            switch (field)
+            {
+                case MultiplierField.Fractionator:
+                case MultiplierField.WalkSpeed:
+                    return 2;
+                default:
+                    return 1;
+            }
+        }
+
+        internal string GetFieldLabel(MultiplierField field)
+        {
+            switch (field)
+            {
+                case MultiplierField.Smelt:
+                    return "熔炉倍率".getTranslate();
+                case MultiplierField.Chemical:
+                    return "化工厂倍率".getTranslate();
+                case MultiplierField.Refine:
+                    return "精炼厂倍率".getTranslate();
+                case MultiplierField.Assemble:
+                    return "制造台倍率".getTranslate();
+                case MultiplierField.Particle:
+                    return "对撞机倍率".getTranslate();
+                case MultiplierField.Lab:
+                    return "研究站倍率".getTranslate();
+                case MultiplierField.Fractionator:
+                    return "分馏器倍率".getTranslate();
+                case MultiplierField.Ejector:
+                    return "弹射器倍率".getTranslate();
+                case MultiplierField.Silo:
+                    return "发射井倍率".getTranslate();
+                case MultiplierField.Gamma:
+                    return "射线站倍率".getTranslate();
+                case MultiplierField.WalkSpeed:
+                    return "行走倍率".getTranslate();
+                case MultiplierField.Mining:
+                    return "采集速度倍率".getTranslate();
+                default:
+                    return string.Empty;
+            }
+        }
+
+        internal string GetFieldValue(MultiplierField field)
+        {
+            switch (field)
+            {
+                case MultiplierField.Smelt:
+                    return smeltmulti_str;
+                case MultiplierField.Chemical:
+                    return chemicalmulti_str;
+                case MultiplierField.Refine:
+                    return refinemulti_str;
+                case MultiplierField.Assemble:
+                    return assemblemulti_str;
+                case MultiplierField.Particle:
+                    return particlemulti_str;
+                case MultiplierField.Lab:
+                    return labmulti_str;
+                case MultiplierField.Fractionator:
+                    return fractionatormulti_str;
+                case MultiplierField.Ejector:
+                    return ejectormulti_str;
+                case MultiplierField.Silo:
+                    return silomulti_str;
+                case MultiplierField.Gamma:
+                    return gammamulti_str;
+                case MultiplierField.WalkSpeed:
+                    return walkspeedmulti_str;
+                case MultiplierField.Mining:
+                    return miningmulti_str;
+                default:
+                    return string.Empty;
+            }
+        }
+
+        internal void SetFieldValue(MultiplierField field, string value)
+        {
+            string safeValue = value ?? string.Empty;
+            switch (field)
+            {
+                case MultiplierField.Smelt:
+                    smeltmulti_str = safeValue;
+                    break;
+                case MultiplierField.Chemical:
+                    chemicalmulti_str = safeValue;
+                    break;
+                case MultiplierField.Refine:
+                    refinemulti_str = safeValue;
+                    break;
+                case MultiplierField.Assemble:
+                    assemblemulti_str = safeValue;
+                    break;
+                case MultiplierField.Particle:
+                    particlemulti_str = safeValue;
+                    break;
+                case MultiplierField.Lab:
+                    labmulti_str = safeValue;
+                    break;
+                case MultiplierField.Fractionator:
+                    fractionatormulti_str = safeValue;
+                    break;
+                case MultiplierField.Ejector:
+                    ejectormulti_str = safeValue;
+                    break;
+                case MultiplierField.Silo:
+                    silomulti_str = safeValue;
+                    break;
+                case MultiplierField.Gamma:
+                    gammamulti_str = safeValue;
+                    break;
+                case MultiplierField.WalkSpeed:
+                    walkspeedmulti_str = safeValue;
+                    break;
+                case MultiplierField.Mining:
+                    miningmulti_str = safeValue;
+                    break;
+            }
+        }
+
+        internal void ApplyField(MultiplierField field)
+        {
+            switch (field)
+            {
+                case MultiplierField.Smelt:
+                    ApplyConfigValue(ref smeltmulti_str, smeltMultiply, "冶炼倍数更改为");
+                    break;
+                case MultiplierField.Chemical:
+                    ApplyConfigValue(ref chemicalmulti_str, chemicalMultiply, "化工厂倍数更改为");
+                    break;
+                case MultiplierField.Refine:
+                    ApplyConfigValue(ref refinemulti_str, refineMultiply, "精炼厂倍数更改为");
+                    break;
+                case MultiplierField.Assemble:
+                    ApplyConfigValue(ref assemblemulti_str, assembleMultiply, "制造台倍数更改为");
+                    break;
+                case MultiplierField.Particle:
+                    ApplyConfigValue(ref particlemulti_str, particleMultiply, "对撞机倍数更改为");
+                    break;
+                case MultiplierField.Lab:
+                    ApplyConfigValue(ref labmulti_str, labMultiply, "研究站倍数更改为");
+                    break;
+                case MultiplierField.Fractionator:
+                    ApplyConfigValue(ref fractionatormulti_str, fractionatorMultiply, "分馏器倍数更改为");
+                    break;
+                case MultiplierField.Ejector:
+                    ApplyConfigValue(ref ejectormulti_str, ejectorMultiply, "弹射器倍数更改为");
+                    break;
+                case MultiplierField.Silo:
+                    ApplyConfigValue(ref silomulti_str, siloMultiply, "发射井倍数更改为");
+                    break;
+                case MultiplierField.Gamma:
+                    ApplyConfigValue(ref gammamulti_str, gammaMultiply, "射线站倍数更改为");
+                    break;
+                case MultiplierField.WalkSpeed:
+                    ApplyWalkSpeedValue();
+                    break;
+                case MultiplierField.Mining:
+                    ApplyConfigValue(ref miningmulti_str, miningMultiply, "采集速度倍数更改为");
+                    break;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            window?.Dispose();
+        }
+
         //工厂
         private static void FactorySystemPatcher()
         {

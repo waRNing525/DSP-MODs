@@ -91,7 +91,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MyUI.cs" />
+    <Compile Include="FactoryMultiplierWindow.cs" />
     <Compile Include="Translate.cs" />
     <Compile Include="FactoryMultiplier.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
