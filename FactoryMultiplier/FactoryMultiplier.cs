@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace FactoryMultiplier
 {
-    [BepInPlugin("waRNing.dsp.plugins.FactoryMultiplier", "FactoryMultiplier", "2.2.0")]
+    [BepInPlugin("waRNing.dsp.plugins.FactoryMultiplier", "FactoryMultiplier", "3.0.0")]
     public class FactoryMultiplier : BaseUnityPlugin
     {
         internal enum MultiplierField
